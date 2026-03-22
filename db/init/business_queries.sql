@@ -1,3 +1,21 @@
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_name ON users(name);
+
+CREATE INDEX IF NOT EXISTS idx_products_category_price
+    ON products(category_id, price);
+
+CREATE INDEX IF NOT EXISTS idx_products_price_desc
+    ON products(price DESC);
+
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id_total
+    ON orders(user_id, total_amount);
+
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON order_items(product_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_product_quantity
+    ON order_items(product_id, quantity);
+
 SELECT * FROM products WHERE price > 1000 ORDER BY price DESC;
 SELECT * FROM products WHERE stock < 20;
 SELECT o.* FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Sergey';
@@ -11,3 +29,4 @@ SELECT u.name AS user_name, o.created_at AS order_date, p.name AS product_name, 
 SELECT products.name, SUM(order_items.quantity) AS total_quantity FROM products JOIN order_items ON products.id = order_items.product_id GROUP BY products.name ORDER BY total_quantity DESC LIMIT 3;
 SELECT users.name FROM users LEFT JOIN orders ON users.id = orders.user_id WHERE orders.id IS NULL;
 SELECT orders.id, orders.total_amount, SUM(order_items.price * order_items.quantity) AS total_amount_from_order_items FROM orders JOIN order_items ON orders.id = order_items.order_id GROUP BY orders.id HAVING orders.total_amount <> SUM(order_items.price * order_items.quantity);
+
