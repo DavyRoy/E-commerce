@@ -42,3 +42,5 @@ CREATE TABLE order_items(
     quantity INTEGER NOT NULL,
     price NUMERIC(10,2) NOT NULL
 );
+
+\i db/init/seed.sql
