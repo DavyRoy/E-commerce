@@ -1,0 +1,13 @@
+SELECT * FROM products WHERE price > 1000 ORDER BY price DESC;
+SELECT * FROM products WHERE stock < 20;
+SELECT o.* FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Sergey';
+SELECT o.* FROM products o JOIN categories c ON o.category_id = c.id WHERE c.name = 'Cameras' AND o.price BETWEEN 1000 AND 5000;
+SELECT SUM(total_amount) FROM orders;
+SELECT c.name, SUM(oi.quantity * oi.price) AS revenue FROM order_items oi JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id GROUP BY c.name ORDER BY revenue DESC;
+SELECT c.name, AVG(p.price) AS avg_price FROM products p JOIN categories c ON p.category_id = c.id GROUP BY c.name;
+SELECT user_id, COUNT(*) AS order_count, SUM(total_amount) AS total_spent FROM orders GROUP BY user_id ORDER BY total_spent DESC;
+SELECT p.* FROM products p JOIN (SELECT category_id, MAX(price) AS max_price FROM products GROUP BY category_id) t ON p.category_id = t.category_id AND p.price = t.max_price;
+SELECT u.name AS user_name, o.created_at AS order_date, p.name AS product_name, oi.quantity, oi.price FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id;
+SELECT products.name, SUM(order_items.quantity) AS total_quantity FROM products JOIN order_items ON products.id = order_items.product_id GROUP BY products.name ORDER BY total_quantity DESC LIMIT 3;
+SELECT users.name FROM users LEFT JOIN orders ON users.id = orders.user_id WHERE orders.id IS NULL;
+SELECT orders.id, orders.total_amount, SUM(order_items.price * order_items.quantity) AS total_amount_from_order_items FROM orders JOIN order_items ON orders.id = order_items.order_id GROUP BY orders.id HAVING orders.total_amount <> SUM(order_items.price * order_items.quantity);
