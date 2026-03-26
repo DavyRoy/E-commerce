@@ -49,10 +49,11 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5000/health\")"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     ports:
       - "5003:5000"
     depends_on:
