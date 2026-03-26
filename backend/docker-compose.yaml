@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: psql
+    environment:
+      POSTGRES_DB: techstore_db
+      POSTGRES_USER: techstore_user
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5434:5432
+    networks:
+      - techstore
+
+  app:
+    build:
+      dockerfile: Dockerfile
+    container_name: techstore
+    ports:
+      - "5003:5000"
+    environment:
+      DB_HOST: psql
+      DB_PORT: 5432
+      DB_NAME: techstore_db
+      DB_USER: techstore_user
+      DB_PASSWORD: postgres
+    networks:
+      - techstore
+
+networks:
+  techstore:
+    driver: bridge

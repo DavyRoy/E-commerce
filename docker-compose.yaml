@@ -1,0 +1,122 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    labels:
+      - techstore
+    container_name: psql
+    environment:
+      POSTGRES_USER: techshop_user
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: techshop_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql
+      - ./db/seed/02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+      - ./db/business_queries/03_business_queries.sql:/docker-entrypoint-initdb.d/03_business_queries.sql
+    restart: always
+    networks:
+      - techstore
+
+  redis:
+    image: redis:7.4-alpine
+    labels:
+      - techstore
+    container_name: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - techstore
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    labels:
+      - techstore
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5000/health\")"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5003:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - techstore
+
+  nginx:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nginx
+    labels:
+      - techstore
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - techstore
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    restart: always
+    networks:
+      - techstore
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    restart: always
+    networks:
+      - techstore
+
+networks:
+  techstore:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  prometheus-data:
+  grafana-data:
+  
