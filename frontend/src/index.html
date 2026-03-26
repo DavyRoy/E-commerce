@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechShop - Your Electronics Store</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>🛒 TechShop</h1>
+            <p>Your trusted electronics store</p>
+            <div class="cart-icon">
+                🛒 Cart (<span id="cart-count">0</span>)
+            </div>
+        </div>
+    </header>
+    
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="catalog.html">Catalog</a>
+        <a href="about.html">About Us</a>
+        <a href="order.html">Checkout</a>
+    </nav>
+    
+    <main>
+        <section class="hero">
+            <h2>Welcome to TechShop!</h2>
+            <p>Discover the latest electronics and gadgets</p>
+        </section>
+        
+        <section class="features">
+            <div class="feature">
+                <h3>🚚 Free Shipping</h3>
+                <p>On orders over $50</p>
+            </div>
+            <div class="feature">
+                <h3>🔒 Secure Payment</h3>
+                <p>100% secure transactions</p>
+            </div>
+            <div class="feature">
+                <h3>⚡ Fast Delivery</h3>
+                <p>Same-day delivery available</p>
+            </div>
+        </section>
+
+        <section class="products-section">
+            <h2>Featured Products</h2>
+            <div id="featured-products" class="products-grid">
+                <!-- Products will be loaded here by JavaScript -->
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2026 TechShop. DevOps Learning Project - Level 2</p>
+    </footer>
+
+    <script src="api.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

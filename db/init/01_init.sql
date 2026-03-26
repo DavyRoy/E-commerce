@@ -4,6 +4,11 @@ DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS users;
 
+CREATE USER techstore_user WITH PASSWORD 'postgres';
+CREATE DATABASE techstore_db OWNER techstore_user;
+
+\c techstore_db
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -20,7 +25,7 @@ CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     price NUMERIC(10,2) NOT NULL,
-    category_id INTEGER REFERENCES categories(id) CASCADE,
+    category_id INTEGER REFERENCES categories(id) ON DELETE RESTRICT,
     stock INTEGER NOT NULL,
     information TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -43,4 +48,4 @@ CREATE TABLE order_items(
     price NUMERIC(10,2) NOT NULL
 );
 
-\i db/init/seed.sql
+\i docker-entrypoint-initdb.d/02_seed.sql
