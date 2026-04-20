@@ -3,3 +3,8 @@ fix:      исправление бага
 chore:    технические задачи (настройка, зависимости)
 docs:     документация
 refactor: рефакторинг без изменения поведения
+
+
+docker postgres
+docker run --name postgres-db -e POSTGRES_PASSWORD=password -e POSTGRES_USER=techstore_user -e POSTGRES_DB=techstore_db -p 5433:5432 -d postgres
+

@@ -1,0 +1,156 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: techshop-backend
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5000/health\")'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5010:5000"
+    depends_on:
+      postgres:
+          condition: service_healthy
+      redis:
+          condition: service_healthy
+    restart: always
+    networks:
+      - techshop-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: techshop-postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    networks:
+      - techshop-network
+
+  postgres_exporter:
+    image: bitnami/postgres-exporter:latest
+    container_name: techshop-postgres-exporter
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+    restart: always
+    networks:
+      - techshop-network
+
+  redis:
+    image: redis:latest
+    container_name: techshop-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+    restart: always
+    networks:
+      - techshop-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: techshop-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    restart: always
+    networks:
+      - techshop-network
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: techshop-node-exporter
+    ports:
+      - "9100:9100"
+    restart: always
+    networks:
+      - techshop-network
+
+  nginx:
+    image: nginx:latest
+    container_name: techshop-nginx
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "80:80"
+    volumes:
+      - nginx-data:/var/cache/nginx/client_temp
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - techshop-network
+  
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: techshop-nginx-exporter
+    ports:
+      - "9113:9113"
+    depends_on:
+      - nginx
+    restart: always
+    networks:
+      - techshop-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: techshop-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    restart: always
+    networks:
+      - techshop-network
+
+networks:
+  techshop-network:
+    driver: bridge
+  
+volumes:
+  postgres-data:
+  prometheus-data:
+  grafana-data:
+  nginx-data:
