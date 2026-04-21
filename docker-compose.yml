@@ -97,7 +97,9 @@ services:
       - techshop-network
 
   nginx:
-    image: nginx:latest
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     container_name: techshop-nginx
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
