@@ -55,21 +55,32 @@ def metrics():
     return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
 @bp.route('/products')
+def get_redis():
+    try:
+        r = redis.from_url(os.getenv('REDIS_URL', 'redis://redis:6379'),
+                           socket_connect_timeout=2)
+        r.ping()
+        return r
+    except Exception:
+        return None
+
+@bp.route('/products')
 def get_products():
     start = time.time()
     r = get_redis()
     cache_key = 'products'
 
-    cached = r.get(cache_key)
-    if cached:
-        redis_cache_hits_total.labels(endpoint='/products').inc()
-        duration = time.time() - start
-        http_request_duration_seconds.labels(method='GET', endpoint='/products').observe(duration)
-        http_requests_total.labels(method='GET', endpoint='/products', status='200').inc()
-        logger.info(f'GET /products - Cache HIT - served from Redis in {int(duration*1000)}ms')
-        return jsonify(json.loads(cached))
+    if r:
+        cached = r.get(cache_key)
+        if cached:
+            redis_cache_hits_total.labels(endpoint='/products').inc()
+            duration = time.time() - start
+            http_request_duration_seconds.labels(method='GET', endpoint='/products').observe(duration)
+            http_requests_total.labels(method='GET', endpoint='/products', status='200').inc()
+            logger.info(f'GET /products - Cache HIT - served from Redis in {int(duration*1000)}ms')
+            return jsonify(json.loads(cached))
+        redis_cache_misses_total.labels(endpoint='/products').inc()
 
-    redis_cache_misses_total.labels(endpoint='/products').inc()
     try:
         conn = get_db()
         cur = conn.cursor()
@@ -82,7 +93,9 @@ def get_products():
         http_requests_total.labels(method='GET', endpoint='/products', status='500').inc()
         return jsonify({'error': str(e)}), 500
 
-    r.setex(cache_key, CACHE_TTL, json.dumps(products))
+    if r:
+        r.setex(cache_key, CACHE_TTL, json.dumps(products))
+
     duration = time.time() - start
     http_request_duration_seconds.labels(method='GET', endpoint='/products').observe(duration)
     http_requests_total.labels(method='GET', endpoint='/products', status='200').inc()
