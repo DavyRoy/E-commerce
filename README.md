@@ -4,10 +4,9 @@
 
 ### Modern Full-Stack E-commerce with DevOps Best Practices
 
-[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/DavyRoy/TechShop-E-commerce/main.yml?label=CI%2FCD&logo=github)](https://github.com/DavyRoy/TechShop-E-commerce/actions)
-[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen)](https://github.com/DavyRoy/TechShop-E-commerce)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://e-commerce-9rcc.onrender.com)
 
 [Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [API](#-api-reference) • [Monitoring](#-monitoring)
 
@@ -16,41 +15,39 @@
 
 ---
 
-## 📖 Table of Contents
+## 📖 Содержание
 
-- [Overview](#-overview)
-- [Project Levels](#-project-levels)
-- [Architecture](#-architecture)
+- [Обзор](#-обзор)
+- [Уровни проекта](#-уровни-проекта)
+- [Архитектура](#-архитектура)
 - [Tech Stack](#-tech-stack)
-- [Features](#-features)
-- [Quick Start](#-quick-start)
+- [Что реализовано](#-что-реализовано)
+- [Быстрый старт](#-быстрый-старт)
 - [API Reference](#-api-reference)
-- [Monitoring & Observability](#-monitoring--observability)
-- [Automation Scripts](#-automation-scripts)
-- [Development](#-development)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
+- [Мониторинг](#-мониторинг)
+- [Скрипты](#-скрипты)
+- [Локальная разработка](#-локальная-разработка)
+- [Деплой](#-деплой)
 - [Troubleshooting](#-troubleshooting)
 - [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-
+- [Автор](#-автор)
 ---
 
-## 🎯 Overview
+## 🎯 Обзор
 
-**TechShop** is a comprehensive e-commerce platform built to demonstrate **modern DevOps practices** and **full-stack development skills**. The project progresses through multiple complexity levels, from static containerized websites to fully monitored microservices architectures.
+**TechStore** — учебный e-commerce проект, созданный для изучения **современных DevOps практик** на реальном стеке. Проект охватывает полный цикл: от локальной разработки до продакшен деплоя с мониторингом.
 
-### 🎓 Learning Objectives
+### 🎓 Чему учит этот проект
 
-This project demonstrates proficiency in:
-- **Containerization** with Docker & Docker Compose
-- **CI/CD** automation with GitHub Actions
-- **Monitoring & Observability** using Prometheus & Grafana
-- **Infrastructure as Code** principles
-- **RESTful API** development with Flask
-- **Database management** with PostgreSQL
-- **Automated testing** with pytest (89% coverage)
-- **DevOps scripting** and automation
+- **Контейнеризация** — Docker и Docker Compose
+- **Мониторинг и observability** — Prometheus и Grafana
+- **Infrastructure as Code** — весь стек описан в коде
+- **Разработка REST API** — Flask
+- **Работа с базами данных** — PostgreSQL
+- **Кэширование** — Redis с TTL и логированием HIT/MISS
+- **Reverse proxy** — Nginx
+- **DevOps скрипты** — bash автоматизация
+- **Продакшен деплой** — Render
 
 ---
 
@@ -58,340 +55,200 @@ This project demonstrates proficiency in:
 
 <table>
 <tr>
-<th>Level</th>
-<th>Status</th>
-<th>Description</th>
-<th>Key Technologies</th>
-</tr>
-<tr>
 <td><strong>Level 1</strong><br/>Beginner</td>
-<td>✅ Complete</td>
-<td>Static website with Nginx and Docker containerization</td>
-<td>HTML/CSS, Nginx, Docker</td>
-</tr>
-<tr>
-<td><strong>Level 2</strong><br/>Junior</td>
-<td>✅ Complete</td>
-<td>Full-stack app with backend API, database, monitoring, and CI/CD</td>
-<td>Flask, PostgreSQL, Prometheus, Grafana, GitHub Actions</td>
-</tr>
-<tr>
-<td><strong>Level 3</strong><br/>Junior+</td>
-<td>🔜 Coming Soon</td>
-<td>Advanced features: Redis caching, Elasticsearch, message queues</td>
-<td>Redis, Elasticsearch, RabbitMQ/Kafka</td>
-</tr>
-<tr>
-<td><strong>Level 4</strong><br/>Middle</td>
-<td>📋 Planned</td>
-<td>Kubernetes orchestration, service mesh, advanced monitoring</td>
-<td>Kubernetes, Istio, Helm, ArgoCD</td>
+<td>✅ Завершён</td>
+<td>Полный стек: Flask API, PostgreSQL, Redis, Nginx, мониторинг</td>
+<td>Docker Compose, PostgreSQL, Redis, Nginx, Prometheus, Grafana</td>
 </tr>
 </table>
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Архитектура
 
-### Level 2 Architecture (Current)
 ```
-                           ┌─────────────────────────┐
-                           │    Internet Users       │
-                           └───────────┬─────────────┘
-                                       │
-                          ┌────────────▼─────────────┐
-                          │   Nginx:80 (Frontend)    │
-                          │  Static Files + Proxy    │
-                          └────────────┬─────────────┘
-                                       │
-                          ┌────────────▼─────────────┐
-                          │   Flask API:5000         │
-                          │   (REST Backend)         │
-                          └────────────┬─────────────┘
-                                       │
-                          ┌────────────▼─────────────┐
-                          │   PostgreSQL:5432        │
-                          │   (Database)             │
-                          └──────────────────────────┘
+                    ┌─────────────────────────┐
+                    │      Пользователь       │
+                    └───────────┬─────────────┘
+                                │
+                   ┌────────────▼─────────────┐
+                   │      Nginx :80           │
+                   │  Reverse Proxy           │
+                   └────────────┬─────────────┘
+                                │
+                   ┌────────────▼─────────────┐
+                   │    Flask API :5000       │
+                   └──────┬─────────┬─────────┘
+                          │         │
+             ┌────────────▼──┐  ┌───▼────────────┐
+             │ PostgreSQL    │  │  Redis :6379   │
+             │ :5432         │  │  Cache         │
+             └───────────────┘  └────────────────┘
 
-Monitoring Stack:
-┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
-│  Prometheus      │─────▶│    Grafana       │      │  Node Exporter   │
-│  :9090           │      │    :3000         │      │  :9100           │
-└──────────────────┘      └──────────────────┘      └──────────────────┘
+Мониторинг:
+┌─────────────────┐     ┌─────────────────┐
+│  Prometheus     │────▶│    Grafana      │
+│  :9090          │     │    :3000        │
+└────────┬────────┘     └─────────────────┘
+         │
+         ├── backend:5000/metrics
+         ├── node_exporter:9100
+         ├── postgres_exporter:9187
+         └── nginx_exporter:9113
+```
 ```
 
-### 🔧 Components
+### 🔧 Компоненты
 
-| Component | Technology | Port | Purpose |
-|-----------|-----------|------|---------|
-| **Frontend** | Nginx Alpine | 8081 | Static files + Reverse proxy |
-| **Backend** | Flask + Gunicorn | 5010 | REST API with business logic |
-| **Database** | PostgreSQL 16 | 5432 | Data persistence |
-| **Monitoring** | Prometheus | 9090 | Metrics collection |
-| **Visualization** | Grafana | 3000 | Dashboards and alerting |
-| **System Metrics** | Node Exporter | 9100 | Host metrics collection |
+| Компонент          | Технология              | Порт | Назначение                    |
+|--------------------|-------------------------|------|-------------------------------|
+| **Nginx**          | nginx:alpine            | 80   | Reverse proxy                 |
+| **Backend**        | Flask + Gunicorn        | 5000 | REST API                      |
+| **Database**       | PostgreSQL 16           | 5432 | Хранение данных               |
+| **Cache**          | Redis 7                 | 6379 | Кэширование запросов          |
+| **Monitoring**     | Prometheus              | 9090 | Сбор метрик                   |
+| **Visualization**  | Grafana                 | 3000 | Дашборды                      |
+| **System Metrics** | Node Exporter           | 9100 | Метрики хоста                 |
+| **DB Metrics**     | Postgres Exporter       | 9187 | Метрики PostgreSQL            |
+| **Nginx Metrics**  | Nginx Exporter          | 9113 | Метрики Nginx                 |
 
 ---
+```
 
 ## 🛠️ Tech Stack
 
 <div align="center">
 
 ### Backend
+
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-red)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)
 
-### Frontend
-![Nginx](https://img.shields.io/badge/Nginx-1.25-009639?logo=nginx&logoColor=white)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black)
+### Infrastructure
 
-### DevOps & Infrastructure
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white)
 ![Grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white)
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?logo=gnubash&logoColor=white)
-
-### Testing & Quality
-![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?logo=pytest&logoColor=white)
-![Coverage](https://img.shields.io/badge/Coverage-89%25-brightgreen)
-![Flake8](https://img.shields.io/badge/Flake8-Linting-blue)
 
 </div>
 
 ---
 
-## ✨ Features
+## ✨ Что реализовано
 
-### 🛍️ E-commerce Features
-- ✅ Product catalog with categories
-- ✅ Advanced pagination and filtering
-- ✅ Shopping cart functionality
-- ✅ Order management system
-- ✅ RESTful API architecture
+### 🛍️ E-commerce
+- ✅ Каталог товаров по категориям
+- ✅ REST API (products, categories, health, metrics)
+- ✅ Схема БД с orders и order_items (готова к расширению)
 
-### 🚀 DevOps Features
-- ✅ **Containerized architecture** - Full Docker Compose orchestration
-- ✅ **Automated CI/CD** - GitHub Actions pipeline with linting and testing
-- ✅ **Comprehensive monitoring** - Prometheus + Grafana dashboards
-- ✅ **High test coverage** - 89% code coverage with pytest
-- ✅ **Automated backups** - PostgreSQL backup scripts
-- ✅ **Health monitoring** - Automated health check scripts
-- ✅ **Centralized logging** - Container log aggregation
-- ✅ **Production-ready** - Gunicorn WSGI server with multiple workers
+### 🚀 DevOps
+- ✅ **Docker Compose** — весь стек одной командой
+- ✅ **Мониторинг** — Prometheus + Grafana с 4 дашбордами
+- ✅ **Redis кэширование** — TTL 60s, логирование HIT/MISS
+- ✅ **Автобэкап** — скрипт резервного копирования PostgreSQL
+- ✅ **Health checks** — для всех сервисов с depends_on
+- ✅ **Безопасность** — non-root контейнеры, секреты через .env
+- ✅ **Продакшен деплой** — Render с PostgreSQL и Redis
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Быстрый старт
 
-### Prerequisites
+### Требования
 
-<table>
-<tr>
-<td>
-<img src="https://www.docker.com/wp-content/uploads/2022/03/vertical-logo-monochromatic.png" width="50"/>
-</td>
-<td><strong>Docker</strong><br/>Version 20.10 or higher</td>
-</tr>
-<tr>
-<td>
-<img src="https://docs.docker.com/compose/images/logo.png" width="50"/>
-</td>
-<td><strong>Docker Compose</strong><br/>Version 2.0 or higher</td>
-</tr>
-<tr>
-<td>📦</td>
-<td><strong>Git</strong><br/>For cloning repository</td>
-</tr>
-</table>
+| Инструмент       | Версия      |
+|------------------|-------------|
+| Docker           | 20.10+      |
+| Docker Compose   | 2.0+        |
+| Git              | любая       |
 
-### 🎬 Installation
-```bash
-# 1. Clone the repository
-git clone https://github.com/DavyRoy/TechShop-E-commerce.git
-cd TechShop-E-commerce
+### 🎬 Установка
 
-# 2. Set up environment variables
+```
+# 1. Клонировать репозиторий
+git clone https://github.com/DavyRoy/E-commerce.git
+cd E-commerce
+
+# 2. Настроить переменные окружения
 cp .env.example .env
-# Edit .env with your configuration
+# Отредактируй .env под свои значения
 
-# 3. Start all services
-docker-compose up -d
+# 3. Запустить все сервисы
+docker compose up -d
 
-# 4. Verify deployment
-./scripts/health-check.sh
+# 4. Проверить что всё работает
+docker compose ps
 
-# 5. Access the application
-# Frontend:   http://localhost:8081
-# Backend:    http://localhost:5010
+# 5. Открыть в браузере
+# API:        http://localhost/products
 # Prometheus: http://localhost:9090
 # Grafana:    http://localhost:3000 (admin/admin)
 ```
-
-### ⚡ Alternative Quick Start Scripts
-```bash
-# Using deployment script (recommended)
-./scripts/deploy.sh
-
-# Manual step-by-step
-docker-compose build
-docker-compose up -d
-docker-compose ps
-```
-
 ---
 
 ## 📚 API Reference
 
 ### Base URL
 ```
-http://localhost:5010/api
+http://localhost
 ```
 
-### Endpoints Overview
+### Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/health` | Health check |
-| `GET` | `/api/categories` | List all categories |
-| `GET` | `/api/products` | List products (paginated) |
-| `GET` | `/api/products/{id}` | Get product by ID |
-| `GET` | `/api/products/category/{id}` | Products by category |
-| `POST` | `/api/orders` | Create new order |
+| Method | Endpoint      | Description          |
+|--------|---------------|----------------------|
+| `GET`  | `/health`     | Health check         |
+| `GET`  | `/products`   | Список всех товаров  |
+| `GET`  | `/categories` | Список категорий     |
+| `GET`  | `/metrics`    | Prometheus метрики   |
 
-### 📖 Detailed API Documentation
+### Примеры
 
-<details>
-<summary><b>GET /api/health</b> - Health Check</summary>
-
-**Response:**
-```json
-{
-  "status": "ok"
-}
 ```
-</details>
+curl http://localhost/health
+# {"service": "techstore-backend", "status": "ok"}
 
-<details>
-<summary><b>GET /api/categories</b> - Get Categories</summary>
+curl http://localhost/products
+# [{"id": 1, "name": "MacBook Pro 13\"", "price": 1299.99, "stock": 100}, ...]
 
-**Response:**
-```json
-[
-  {
-    "id": 1,
-    "name": "Electronics",
-    "description": "Electronic devices",
-    "created_at": "2026-02-25T10:00:00",
-    "updated_at": "2026-02-25T10:00:00"
-  }
-]
-```
-</details>
-
-<details>
-<summary><b>GET /api/products?page=1&limit=10</b> - Get Products</summary>
-
-**Query Parameters:**
-- `page` (optional): Page number (default: 1)
-- `limit` (optional): Items per page (default: 10)
-
-**Response:**
-```json
-{
-  "products": [
-    {
-      "id": 1,
-      "name": "MacBook Pro 13\"",
-      "description": "Apple M1 chip, 8GB RAM",
-      "price": 1299.99,
-      "stock": 10,
-      "category_id": 1
-    }
-  ],
-  "total": 21,
-  "page": 1,
-  "pages": 3,
-  "limit": 10
-}
-```
-</details>
-
-<details>
-<summary><b>POST /api/orders</b> - Create Order</summary>
-
-**Request Body:**
-```json
-{
-  "customer_name": "John Doe",
-  "customer_email": "john@example.com",
-  "items": [
-    {
-      "product_id": 1,
-      "quantity": 2
-    }
-  ]
-}
+curl http://localhost/categories
+# [{"id": 1, "name": "Notebooks"}, ...]
 ```
 
-**Response (201):**
-```json
-{
-  "order_id": 123,
-  "message": "Order created successfully"
-}
-```
-</details>
+## 📊 Мониторинг
 
-> 📘 **Full API Documentation**: See [docs/API.md](docs/API.md) for complete details
+### Prometheus
+Доступ: **http://localhost:9090**
 
----
+**Метрики backend:**
+- `http_requests_total` — счётчик запросов по endpoint и статусу
+- `http_request_duration_seconds` — гистограмма времени ответа
+- `redis_cache_hits_total` — попадания в кэш
+- `redis_cache_misses_total` — промахи кэша
 
-## 📊 Monitoring & Observability
+### Grafana
+Доступ: **http://localhost:3000** (admin/admin)
 
-### Prometheus Metrics
+**Дашборд TechStore:**
+- HTTP Requests Rate
+- Request Duration p99
+- Cache Hit Rate (%)
+- Active Connections
 
-Access: **http://localhost:9090**
-
-**Key Metrics:**
-- `flask_http_request_total` - Total HTTP requests by endpoint and method
-- `flask_http_request_duration_seconds` - Request latency histogram
-- `node_cpu_seconds_total` - CPU usage metrics
-- `node_memory_MemTotal_bytes` - Memory utilization
-
-### Grafana Dashboards
-
-Access: **http://localhost:3000** (admin/admin)
-
-**Pre-configured Dashboards:**
-1. **TechShop Monitoring**
-    - HTTP request rate (requests/second)
-    - Average response time
-    - HTTP status code distribution
-    - Total request counter
-
-2. **System Resources** (via Node Exporter)
-    - CPU usage
-    - Memory utilization
-    - Disk I/O
-    - Network traffic
-
-### Example Queries
+### PromQL примеры
 ```promql
-# Request rate per second
-rate(flask_http_request_total[5m])
+# Запросов в секунду
+rate(http_requests_total[5m])
 
-# Average response time
-rate(flask_http_request_duration_seconds_sum[5m]) / 
-rate(flask_http_request_duration_seconds_count[5m])
+# p99 время ответа
+histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
 
-# 95th percentile latency
-histogram_quantile(0.95, flask_http_request_duration_seconds_bucket)
+# Cache hit rate
+rate(redis_cache_hits_total[5m]) / (rate(redis_cache_hits_total[5m]) + rate(redis_cache_misses_total[5m])) * 100
 ```
 
 ---
@@ -408,344 +265,187 @@ All automation scripts are located in `scripts/` directory.
 | **logs.sh** | View container logs | `./scripts/logs.sh [service]` |
 | **cleanup.sh** | Clean Docker resources | `./scripts/cleanup.sh` |
 
-### Examples
+## 🔧 Скрипты автоматизации
+
+| Скрипт | Назначение | Использование |
+|--------|------------|---------------|
+| **setup.sh** | Проверка зависимостей | `./scripts/setup.sh` |
+| **backup.sh** | Бэкап PostgreSQL | `./scripts/backup.sh` |
+
+### Примеры
 ```bash
-# Create database backup
+# Проверить зависимости
+./scripts/setup.sh
+
+# Создать бэкап базы данных
 ./scripts/backup.sh
-# Output: ./backups/backup_20260225_143022.sql
-
-# Deploy application with rebuild
-./scripts/deploy.sh
-
-# Check all services
-./scripts/health-check.sh
-# ✅ techshop-frontend is running
-# ✅ techshop-backend is running
-# ✅ Backend API is responding
-
-# View backend logs (last 50 lines, follow mode)
-./scripts/logs.sh backend -n 50 -f
-
-# Clean unused Docker resources
-./scripts/cleanup.sh
+# Output: ./backups/techstore_db-2026-04-24.sql
 ```
+## 💻 Локальная разработка
 
-> 📘 **Script Documentation**: See [scripts/README.md](scripts/README.md)
-
----
-
-## 💻 Development
-
-### Local Setup
 ```bash
-# 1. Create Python virtual environment
+# 1. Создать виртуальное окружение
 cd backend
 python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate
 
-# 2. Install dependencies
+# 2. Установить зависимости
 pip install -r requirements.txt
 
-# 3. Set environment variables
-export POSTGRES_USER=your_username
-export POSTGRES_PASSWORD=your_password
-export POSTGRES_DB=techshop
-export POSTGRES_HOST=localhost
+# 3. Установить переменные окружения
+export DATABASE_URL=postgresql://techstore_user:secret@localhost:5432/techstore_db
+export REDIS_URL=redis://localhost:6379
 export SECRET_KEY=dev-secret-key
 
-# 4. Run development server
-python wsgi.py
+# 4. Запустить сервер разработки
+python run.py
 ```
 
-### Project Structure
+### Структура проекта
+
 ```
-TechShop-E-commerce/
-├── 📁 backend/                 # Flask REST API
-│   ├── 📁 app/
+E-commerce/
+├── backend/                    # Flask REST API
+│   ├── app/
 │   │   ├── __init__.py        # App factory
-│   │   ├── config.py          # Configuration
-│   │   ├── models.py          # SQLAlchemy models
-│   │   └── routes.py          # API endpoints
-│   ├── 📁 tests/
-│   │   ├── conftest.py        # Pytest fixtures
-│   │   ├── test_api.py        # API tests
-│   │   └── test_health.py     # Health tests
-│   ├── wsgi.py                # WSGI entry point
-│   ├── Dockerfile             # Backend container
-│   ├── requirements.txt       # Python dependencies
-│   └── pytest.ini             # Test configuration
+│   │   ├── config.py          # Конфигурация
+│   │   ├── models.py          # Схема данных
+│   │   └── main.py            # API endpoints
+│   ├── run.py                 # Точка входа
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   └── requirements.txt
 │
-├── 📁 frontend/                # Nginx frontend
-│   ├── 📁 nginx/
-│   │   └── nginx.conf         # Nginx config
-│   ├── 📁 src/                # Static files
-│   └── Dockerfile             # Frontend container
+├── nginx/                      # Reverse proxy
+│   ├── nginx.conf
+│   └── Dockerfile
 │
-├── 📁 database/                # Database initialization
-│   ├── schema.sql             # Table definitions
-│   └── init.sql               # Seed data
+├── db/
+│   └── init/
+│       └── init.sql           # Схема и тестовые данные
 │
-├── 📁 monitoring/              # Monitoring stack
-│   ├── 📁 prometheus/
-│   │   └── prometheus.yml     # Prometheus config
-│   └── 📁 grafana/
-│       └── provisioning/      # Auto-provisioning
+├── monitoring/
+│   ├── prometheus/
+│   │   └── prometheus.yml
+│   └── grafana/
+│       ├── provisioning/
+│       │   ├── datasources/
+│       │   └── dashboards/
+│       └── dashboards/
+│           └── techstore.json
 │
-├── 📁 scripts/                 # Automation scripts
-│   ├── backup.sh
-│   ├── deploy.sh
-│   ├── health-check.sh
-│   ├── logs.sh
-│   └── cleanup.sh
+├── scripts/
+│   ├── setup.sh               # Проверка зависимостей
+│   └── backup.sh              # Бэкап PostgreSQL
 │
-├── 📁 .github/
-│   └── workflows/
-│       └── main.yml           # CI/CD pipeline
+├── docs/
+│   ├── architecture.md
+│   └── project-structure.md
 │
-├── docker-compose.yaml        # Orchestration
-├── .env.example               # Environment template
-└── README.md                  # This file
+├── docker-compose.yml
+├── .env.example
+└── README.md
 ```
-
 ---
 
-## 🧪 Testing
+## 🚢 Деплой
 
-### Run Tests
+### Локальный запуск
 ```bash
-cd backend
-
-# Run all tests
-pytest -v
-
-# Run with coverage
-pytest --cov=app --cov-report=term-missing
-
-# Run specific test file
-pytest tests/test_api.py -v
-
-# Run with HTML coverage report
-pytest --cov=app --cov-report=html
-open htmlcov/index.html
-```
-
-### Test Coverage
-
-**Current Coverage: 89%**
-
-| Module | Coverage |
-|--------|----------|
-| app/__init__.py | 100% |
-| app/config.py | 100% |
-| app/models.py | 88% |
-| app/routes.py | 86% |
-
-### CI/CD Pipeline
-
-GitHub Actions automatically runs on every push:
-```yaml
-✓ Linting (flake8)
-✓ Unit Tests (pytest)
-✓ Coverage Report
-✓ Docker Compose Validation
-✓ Docker Image Builds
-```
-
-**Pipeline Status**: [![CI/CD](https://github.com/DavyRoy/TechShop-E-commerce/actions/workflows/main.yml/badge.svg)](https://github.com/DavyRoy/TechShop-E-commerce/actions)
-
----
-
-## 🚢 Deployment
-
-### Production Deployment
-```bash
-# 1. Configure production environment
 cp .env.example .env
-# Edit .env with production values
-
-# 2. Deploy with automated script
-./scripts/deploy.sh
-
-# 3. Verify deployment
-./scripts/health-check.sh
-
-# 4. Create initial backup
-./scripts/backup.sh
+# Заполни .env своими значениями
+docker compose up -d
+docker compose ps
 ```
 
-### Backup Strategy
+### Продакшен (Render)
+Live demo: https://e-commerce-9rcc.onrender.com
+
+### Бэкап
 ```bash
-# Manual backup
 ./scripts/backup.sh
-
-# Automated cleanup (backups older than 7 days deleted automatically)
-# Backups saved to: ./backups/backup_YYYYMMDD_HHMMSS.sql
+# Сохраняет: ./backups/techstore_db-YYYY-MM-DD.sql
+# Автоудаление бэкапов старше 7 дней
 ```
 
-### Environment Variables
+### Переменные окружения
 
-Required variables in `.env`:
 ```env
 # Database
-POSTGRES_USER=production_user
-POSTGRES_PASSWORD=strong_password_here
-POSTGRES_DB=techshop
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
+POSTGRES_USER=techstore_user
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=techstore_db
 
 # Application
-SECRET_KEY=production-secret-key-change-this
+SECRET_KEY=your-secret-key
 
 # Grafana
 GRAFANA_ADMIN_USER=admin
-GRAFANA_ADMIN_PASSWORD=secure_password_here
+GRAFANA_ADMIN_PASSWORD=your_password
 ```
-
 ---
 
 ## 🐛 Troubleshooting
 
-### Common Issues
-
-<details>
-<summary><b>Services not starting</b></summary>
+### Сервисы не запускаются
 ```bash
-# Check container status
-docker ps -a
-
-# View logs for specific service
-./scripts/logs.sh backend
-
-# Restart services
-docker-compose restart
-
-# Complete rebuild
-docker-compose down
-docker-compose up --build -d
+docker compose ps
+docker compose logs backend
+docker compose down && docker compose up --build -d
 ```
-</details>
 
-<details>
-<summary><b>Database connection errors</b></summary>
+### Ошибки подключения к БД
 ```bash
-# Check PostgreSQL status
-docker exec techshop-postgres pg_isready
-
-# View database logs
-./scripts/logs.sh postgres
-
-# Verify environment variables
-docker exec techshop-backend env | grep POSTGRES
+docker compose exec postgres pg_isready -U techstore_user
+docker compose logs postgres
+docker compose exec backend env | grep POSTGRES
 ```
-</details>
 
-<details>
-<summary><b>Port already in use</b></summary>
+### Порт уже занят
 ```bash
-# Find process using port 8081
-lsof -i :8081
-
-# Kill the process
+# Найти процесс на порту 80
+lsof -i :80
 kill -9 <PID>
-
-# Or change port in docker-compose.yaml
 ```
-</details>
 
-<details>
-<summary><b>Out of disk space</b></summary>
+### Очистка Docker ресурсов
 ```bash
-# Clean Docker resources
-./scripts/cleanup.sh
-
-# Remove old backups
-rm -rf backups/*
-
-# Check disk usage
-docker system df
+docker system prune -f
+docker volume ls
+docker compose down -v  # ⚠️ удалит все данные
 ```
-</details>
-
----
 
 ## 🗺️ Roadmap
 
-### ✅ Completed (Level 1 & 2)
-- [x] Static website with Nginx
-- [x] Docker containerization
-- [x] PostgreSQL database integration
-- [x] Flask REST API
-- [x] Prometheus monitoring
-- [x] Grafana dashboards
-- [x] GitHub Actions CI/CD
-- [x] Automated testing (89% coverage)
-- [x] Automation scripts
-
-### 🚧 In Progress (Level 3)
-- [ ] Redis caching layer
-- [ ] Elasticsearch for product search
-- [ ] Message queue (RabbitMQ/Kafka)
-- [ ] Microservices refactoring
-- [ ] API rate limiting
-- [ ] JWT authentication
-
-### 📋 Planned (Level 4)
-- [ ] Kubernetes deployment
-- [ ] Helm charts
-- [ ] Service mesh (Istio)
-- [ ] ArgoCD for GitOps
-- [ ] Advanced monitoring (Jaeger tracing)
-- [ ] Multi-region deployment
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'Add AmazingFeature'`)
-4. **Push** to the branch (`git push origin feature/AmazingFeature`)
-5. **Open** a Pull Request
-
-### Code Style
-
-- Python: Follow PEP 8, use `flake8` for linting
-- Max line length: 120 characters
-- All tests must pass: `pytest -v`
-
+### ✅ Завершено (Beginner)
+- [x] Структура проекта и Git workflow
+- [x] PostgreSQL схема с индексами и constraints
+- [x] Docker Compose полный стек
+- [x] Nginx reverse proxy
+- [x] Redis кэширование
+- [x] Prometheus метрики
+- [x] Grafana дашборды
+- [x] Bash скрипты автоматизации
+- [x] Продакшен деплой на Render
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+MIT License — см. [LICENSE](LICENSE)
 
----
+## 👤 Автор
 
-## 👨‍💻 Author
-
-**DavyRoy** - DevOps Engineer in Training
+**DavyRoy** — DevOps Engineer in Training
 
 - GitHub: [@DavyRoy](https://github.com/DavyRoy)
-- Project Link: [TechShop-E-commerce](https://github.com/DavyRoy/TechShop-E-commerce)
-
----
-
-## 🙏 Acknowledgments
-
-- Built as part of comprehensive DevOps learning journey
-- Inspired by modern e-commerce architectures
-- Thanks to the open-source community for amazing tools
+- Репозиторий: [E-commerce](https://github.com/DavyRoy/E-commerce)
 
 ---
 
 <div align="center">
 
-### ⭐ If you found this project helpful, please give it a star!
+**Made with ❤️ by DavyRoy**
 
-**Made with ❤️ and ☕ by DavyRoy**
-
-[⬆ Back to Top](#-techshop-e-commerce-platform)
+[⬆ Наверх](#-techstore--e-commerce-platform)
 
 </div>
