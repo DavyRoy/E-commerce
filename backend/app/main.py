@@ -15,7 +15,6 @@ bp = Blueprint('main', __name__)
 
 CACHE_TTL = 60
 
-# Метрики
 http_requests_total = Counter(
     'http_requests_total',
     'Total HTTP requests',
@@ -44,7 +43,15 @@ def get_db():
     return psycopg2.connect(os.getenv('DATABASE_URL'))
 
 def get_redis():
-    return redis.from_url(os.getenv('REDIS_URL', 'redis://redis:6379'))
+    try:
+        r = redis.from_url(
+            os.getenv('REDIS_URL', 'redis://redis:6379'),
+            socket_connect_timeout=2
+        )
+        r.ping()
+        return r
+    except Exception:
+        return None
 
 @bp.route('/health')
 def health():
@@ -53,16 +60,6 @@ def health():
 @bp.route('/metrics')
 def metrics():
     return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
-
-@bp.route('/products')
-def get_redis():
-    try:
-        r = redis.from_url(os.getenv('REDIS_URL', 'redis://redis:6379'),
-                           socket_connect_timeout=2)
-        r.ping()
-        return r
-    except Exception:
-        return None
 
 @bp.route('/products')
 def get_products():
@@ -86,7 +83,7 @@ def get_products():
         cur = conn.cursor()
         cur.execute("SELECT id, name, price, stock FROM products ORDER BY id")
         rows = cur.fetchall()
-        products = [{'id': r[0], 'name': r[1], 'price': float(r[2]), 'stock': r[3]} for r in rows]
+        products = [{'id': row[0], 'name': row[1], 'price': float(row[2]), 'stock': row[3]} for row in rows]
         cur.close()
         conn.close()
     except Exception as e:
@@ -108,29 +105,32 @@ def get_categories():
     r = get_redis()
     cache_key = 'categories'
 
-    cached = r.get(cache_key)
-    if cached:
-        redis_cache_hits_total.labels(endpoint='/categories').inc()
-        duration = time.time() - start
-        http_request_duration_seconds.labels(method='GET', endpoint='/categories').observe(duration)
-        http_requests_total.labels(method='GET', endpoint='/categories', status='200').inc()
-        logger.info('GET /categories - Cache HIT')
-        return jsonify(json.loads(cached))
+    if r:
+        cached = r.get(cache_key)
+        if cached:
+            redis_cache_hits_total.labels(endpoint='/categories').inc()
+            duration = time.time() - start
+            http_request_duration_seconds.labels(method='GET', endpoint='/categories').observe(duration)
+            http_requests_total.labels(method='GET', endpoint='/categories', status='200').inc()
+            logger.info('GET /categories - Cache HIT')
+            return jsonify(json.loads(cached))
+        redis_cache_misses_total.labels(endpoint='/categories').inc()
 
-    redis_cache_misses_total.labels(endpoint='/categories').inc()
     try:
         conn = get_db()
         cur = conn.cursor()
         cur.execute("SELECT id, name FROM categories ORDER BY id")
         rows = cur.fetchall()
-        categories = [{'id': r[0], 'name': r[1]} for r in rows]
+        categories = [{'id': row[0], 'name': row[1]} for row in rows]
         cur.close()
         conn.close()
     except Exception as e:
         http_requests_total.labels(method='GET', endpoint='/categories', status='500').inc()
         return jsonify({'error': str(e)}), 500
 
-    r.setex(cache_key, CACHE_TTL, json.dumps(categories))
+    if r:
+        r.setex(cache_key, CACHE_TTL, json.dumps(categories))
+
     duration = time.time() - start
     http_request_duration_seconds.labels(method='GET', endpoint='/categories').observe(duration)
     http_requests_total.labels(method='GET', endpoint='/categories', status='200').inc()
